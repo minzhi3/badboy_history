@@ -38,6 +38,17 @@ BBH:SetScript("OnEvent", function(frame, _, ad)
 			tremove(BBCCHISTORY, 1)
 		end
 	end
+	
+	if type(BBLHISTORY) ~= "table" then
+		BBLHISTORY = {}
+	end
+	num = #BBLHISTORY
+	if num > 50 then
+		num = num - 50
+		for i = 1, num do
+			tremove(BBLHISTORY, 1)
+		end
+	end
 
 
 
@@ -221,6 +232,64 @@ BBH:SetScript("OnEvent", function(frame, _, ad)
 		bbghistoryEditBox:SetText(text or "")
 	end)
 	--[[     End Guilded Frame     ]]--
+	
+		--[[     Start Level Frame     ]]--
+	local bblhistory = CreateFrame("Frame", nil, frame)
+	bblhistory.name, bblhistory.parent = "_Level History", "BadBoy History"
+	InterfaceOptions_AddCategory(bblhistory)
+
+	local bblhistoryTitle = bblhistory:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+	bblhistoryTitle:SetPoint("TOPLEFT", 16, -16)
+	bblhistoryTitle:SetText("_Level History")
+
+	local bblhistoryScrollArea = CreateFrame("ScrollFrame", "BadBoyLevelHistoryScroll", bblhistory, "UIPanelScrollFrameTemplate")
+	bblhistoryScrollArea:SetPoint("TOPLEFT", bblhistoryTitle, "BOTTOMLEFT", 0, -15)
+	bblhistoryScrollArea:SetPoint("BOTTOMRIGHT", bblhistory, "BOTTOMRIGHT", -30, 10)
+
+	local bblhistoryEditBox = CreateFrame("EditBox", nil, bblhistory)
+	bblhistoryEditBox:SetMultiLine(true)
+	bblhistoryEditBox:SetMaxLetters(99999)
+	bblhistoryEditBox:EnableMouse(false)
+	bblhistoryEditBox:SetAutoFocus(false)
+	bblhistoryEditBox:SetFontObject(ChatFontNormal)
+	bblhistoryEditBox:SetWidth(575)
+	bblhistoryEditBox:SetHeight(500)
+	bblhistoryEditBox:Show()
+
+	bblhistoryScrollArea:SetScrollChild(bblhistoryEditBox)
+
+	local bblhistoryBackdrop = CreateFrame("Frame", nil, bblhistory)
+	bblhistoryBackdrop:SetBackdrop({bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+		edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+		tile = true, tileSize = 16, edgeSize = 16,
+		insets = {left = 3, right = 3, top = 5, bottom = 3}}
+	)
+	bblhistoryBackdrop:SetBackdropColor(0,0,0,1)
+	bblhistoryBackdrop:SetPoint("TOPLEFT", bblhistoryTitle, "BOTTOMLEFT", -5, 0)
+	bblhistoryBackdrop:SetPoint("BOTTOMRIGHT", bblhistory, "BOTTOMRIGHT", -27, 5)
+
+	local bblhistoryButton = CreateFrame("Button", nil, bblhistory, "UIPanelButtonTemplate")
+	bblhistoryButton:SetWidth(60)
+	bblhistoryButton:SetHeight(25)
+	bblhistoryButton:SetPoint("TOPRIGHT", bblhistory, "TOPRIGHT", -35, -7)
+	bblhistoryButton:SetText(RESET)
+	bblhistoryButton:SetScript("OnClick", function(frame)
+		wipe(BBLHISTORY)
+		bblhistoryEditBox:SetText("")
+	end)
+
+	bblhistory:SetScript("OnShow", function()
+		local text
+		for i=1, #BBLHISTORY do
+			if not text then
+				text = BBLHISTORY[i]
+			else
+				text = text.."\n\n"..BBLHISTORY[i]
+			end
+		end
+		bblhistoryEditBox:SetText(text or "")
+	end)
+	--[[     End Level Frame     ]]--
 
 	--[[     Set Global Logging Function     ]]--
 	BadBoyLog = function(addon, event, player, msg)
@@ -238,6 +307,9 @@ BBH:SetScript("OnEvent", function(frame, _, ad)
 		elseif addon == "CCleaner" then
 			tinsert(BBCCHISTORY, dump)
 			bbcchistoryEditBox:SetText(bbcchistoryEditBox:GetText().. "\n\n"..dump)
+		elseif addon == "Level" then
+			tinsert(BBLHISTORY, dump)
+			bblhistoryEditBox:SetText(bblhistoryEditBox:GetText().. "\n\n"..dump)
 		end
 	end
 
